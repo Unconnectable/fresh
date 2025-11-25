@@ -36,3 +36,15 @@
 
 *HTML code with syntax highlighting*
 
+## Step 6: css_highlighting
+
+![css_highlighting](../screenshots/Multi-Language_Highlighting_06_css_highlighting.svg)
+
+*CSS code with syntax highlighting*
+
+## Step 7: c_highlighting
+
+![c_highlighting](../screenshots/Multi-Language_Highlighting_07_c_highlighting.svg)
+
+*C code with syntax highlighting*
+
