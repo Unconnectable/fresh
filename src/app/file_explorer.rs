@@ -103,6 +103,9 @@ impl Editor {
 
     pub fn focus_file_explorer(&mut self) {
         if self.file_explorer_visible {
+            // Cancel search/replace prompts when switching focus away from editor
+            self.cancel_search_prompt_if_active();
+
             self.key_context = KeyContext::FileExplorer;
             self.set_status_message("File explorer focused".to_string());
             self.sync_file_explorer_to_active_file();

@@ -1889,6 +1889,10 @@ impl Editor {
             return; // No change
         }
 
+        // Cancel search/replace prompts when switching buffers
+        // (they are buffer-specific and don't make sense across buffers)
+        self.cancel_search_prompt_if_active();
+
         self.active_buffer = buffer_id;
 
         // Update split manager to show this buffer
@@ -3136,6 +3140,30 @@ impl Editor {
             prompt_type,
             initial_text,
         ));
+    }
+
+    /// Cancel search/replace prompts if one is active.
+    /// Called when focus leaves the editor (e.g., switching buffers, focusing file explorer).
+    fn cancel_search_prompt_if_active(&mut self) {
+        if let Some(ref prompt) = self.prompt {
+            if matches!(
+                prompt.prompt_type,
+                PromptType::Search
+                    | PromptType::ReplaceSearch
+                    | PromptType::Replace { .. }
+                    | PromptType::QueryReplaceSearch
+                    | PromptType::QueryReplace { .. }
+                    | PromptType::QueryReplaceConfirm
+            ) {
+                self.prompt = None;
+                // Also cancel interactive replace if active
+                self.interactive_replace_state = None;
+                // Clear search highlights from current buffer
+                let ns = self.search_namespace.clone();
+                let state = self.active_state_mut();
+                state.overlays.clear_namespace(&ns, &mut state.marker_list);
+            }
+        }
     }
 
     /// Compute the default directory text for the Open File prompt
