@@ -596,10 +596,7 @@ impl Editor {
             }
             Action::Close => {
                 let buffer_id = self.active_buffer;
-                // Check if it's the last buffer
-                if self.buffers.len() == 1 {
-                    self.set_status_message("Cannot close last buffer".to_string());
-                } else if self.active_state().buffer.is_modified() {
+                if self.active_state().buffer.is_modified() {
                     // Buffer has unsaved changes - prompt for confirmation
                     let name = self.get_buffer_display_name(buffer_id);
                     self.start_prompt(
@@ -2726,10 +2723,7 @@ impl Editor {
 
             // Handle close button click
             if clicked_close {
-                // Check if it's the last buffer
-                if self.buffers.len() == 1 {
-                    self.set_status_message("Cannot close last buffer".to_string());
-                } else if let Some(state) = self.buffers.get(&clicked_buffer) {
+                if let Some(state) = self.buffers.get(&clicked_buffer) {
                     if state.buffer.is_modified() {
                         // Buffer has unsaved changes - prompt for confirmation
                         let name = self.get_buffer_display_name(clicked_buffer);

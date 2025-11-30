@@ -1268,13 +1268,13 @@ impl Editor {
 
     /// Internal helper to close a buffer (shared by close_buffer and force_close_buffer)
     fn close_buffer_internal(&mut self, id: BufferId) -> io::Result<()> {
-        // Can't close if it's the only buffer
-        if self.buffers.len() == 1 {
-            return Err(io::Error::other("Cannot close last buffer"));
-        }
-
-        // Find a replacement buffer (any buffer that's not the one being closed)
-        let replacement_buffer = *self.buffers.keys().find(|&&bid| bid != id).unwrap();
+        // If it's the last buffer, create a new anonymous buffer first
+        let replacement_buffer = if self.buffers.len() == 1 {
+            self.new_buffer()
+        } else {
+            // Find a replacement buffer (any buffer that's not the one being closed)
+            *self.buffers.keys().find(|&&bid| bid != id).unwrap()
+        };
 
         // Update all splits that are showing this buffer to show the replacement
         let splits_to_update = self.split_manager.splits_for_buffer(id);
