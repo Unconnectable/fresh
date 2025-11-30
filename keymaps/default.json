@@ -59,6 +59,14 @@
       "when": "global"
     },
     {
+      "comment": "Normal context - Close tab",
+      "key": "w",
+      "modifiers": ["alt"],
+      "action": "close",
+      "args": {},
+      "when": "normal"
+    },
+    {
       "comment": "Normal context - Basic movement",
       "key": "Left",
       "modifiers": [],
