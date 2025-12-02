@@ -274,6 +274,45 @@ fn scope_to_category(scope: &str) -> Option<HighlightCategory> {
         return Some(HighlightCategory::String);
     }
 
+    // Markdown/markup scopes - handle before generic keyword/punctuation checks
+    // See: https://macromates.com/manual/en/language_grammars (TextMate scope naming)
+    // Headings: markup.heading
+    if scope_lower.starts_with("markup.heading") {
+        return Some(HighlightCategory::Keyword); // Headers styled like keywords (bold, prominent)
+    }
+    // Bold: markup.bold
+    if scope_lower.starts_with("markup.bold") {
+        return Some(HighlightCategory::Constant); // Bold styled like constants (bright)
+    }
+    // Italic: markup.italic
+    if scope_lower.starts_with("markup.italic") {
+        return Some(HighlightCategory::Variable); // Italic styled like variables
+    }
+    // Inline code and code blocks: markup.raw, markup.inline.raw
+    if scope_lower.starts_with("markup.raw") || scope_lower.starts_with("markup.inline.raw") {
+        return Some(HighlightCategory::String); // Code styled like strings
+    }
+    // Links: markup.underline.link
+    if scope_lower.starts_with("markup.underline.link") {
+        return Some(HighlightCategory::Function); // Links styled like functions (distinct color)
+    }
+    // Generic underline (often links)
+    if scope_lower.starts_with("markup.underline") {
+        return Some(HighlightCategory::Function);
+    }
+    // Block quotes: markup.quote
+    if scope_lower.starts_with("markup.quote") {
+        return Some(HighlightCategory::Comment); // Quotes styled like comments (subdued)
+    }
+    // Lists: markup.list
+    if scope_lower.starts_with("markup.list") {
+        return Some(HighlightCategory::Operator); // List markers styled like operators
+    }
+    // Strikethrough: markup.strikethrough
+    if scope_lower.starts_with("markup.strikethrough") {
+        return Some(HighlightCategory::Comment); // Strikethrough styled subdued
+    }
+
     // Keywords
     if scope_lower.starts_with("keyword.control")
         || scope_lower.starts_with("keyword.other")
@@ -480,6 +519,51 @@ mod tests {
         assert_eq!(
             scope_to_category("constant.numeric.float"),
             Some(HighlightCategory::Number)
+        );
+    }
+
+    #[test]
+    fn test_scope_to_category_markup() {
+        // Markdown/markup scopes
+        assert_eq!(
+            scope_to_category("markup.heading.1.markdown"),
+            Some(HighlightCategory::Keyword)
+        );
+        assert_eq!(
+            scope_to_category("markup.heading.2"),
+            Some(HighlightCategory::Keyword)
+        );
+        assert_eq!(
+            scope_to_category("markup.bold"),
+            Some(HighlightCategory::Constant)
+        );
+        assert_eq!(
+            scope_to_category("markup.italic"),
+            Some(HighlightCategory::Variable)
+        );
+        assert_eq!(
+            scope_to_category("markup.raw.inline"),
+            Some(HighlightCategory::String)
+        );
+        assert_eq!(
+            scope_to_category("markup.raw.block"),
+            Some(HighlightCategory::String)
+        );
+        assert_eq!(
+            scope_to_category("markup.underline.link"),
+            Some(HighlightCategory::Function)
+        );
+        assert_eq!(
+            scope_to_category("markup.quote"),
+            Some(HighlightCategory::Comment)
+        );
+        assert_eq!(
+            scope_to_category("markup.list.unnumbered"),
+            Some(HighlightCategory::Operator)
+        );
+        assert_eq!(
+            scope_to_category("markup.strikethrough"),
+            Some(HighlightCategory::Comment)
         );
     }
 
