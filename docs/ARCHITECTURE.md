@@ -963,3 +963,147 @@ Until full migration, these workarounds maintain correctness:
 1. `sync_viewport_from_split_view_state` only syncs DIMENSIONS, not scroll position
 2. `ensure_visible_in_layout` called in render phase with actual view_lines
 3. Editor.render() does NOT call sync_with_cursor (let split_rendering handle it)
+
+## Session Persistence
+
+Fresh automatically saves and restores editor state per working directory. When you close the editor and reopen in the same directory, your workspace is restored.
+
+### What Gets Saved
+
+- **Split layout**: Window split configuration (horizontal/vertical splits, ratios)
+- **Open files**: All open files in each split, with active tab
+- **Cursor positions**: Per-file cursor position and selection state
+- **Scroll positions**: Per-file scroll position (as byte offset)
+- **File explorer state**: Visibility, width, expanded directories
+- **Search/replace history**: Per-project search terms
+- **Search options**: Case sensitivity, regex, whole word settings
+- **Bookmarks**: Global bookmarks with file paths and positions
+- **Config overrides**: Per-project toggle overrides (line wrap, line numbers, etc.)
+
+### Storage
+
+Sessions are stored in `~/.local/share/fresh/sessions/` with filenames derived from the working directory path:
+
+```
+~/.local/share/fresh/sessions/
+├── home_user_my%20project.json    # Encoded path as filename
+└── ...
+```
+
+Path encoding: `/` → `_`, spaces → `%20` (URL encoding for special chars).
+
+### Implementation
+
+**Key files:**
+- `src/session.rs` - Session types and serialization
+- `src/app/session.rs` - Save/restore integration
+
+**Session lifecycle:**
+1. **Load on startup**: `SessionManager::load()` checks for existing session
+2. **Apply to editor**: `Session::apply_to_editor()` opens files, restores splits, cursors
+3. **Save on exit**: `SessionManager::save()` captures current state
+4. **Incremental saves**: Dirty flag + debounce saves periodically (crash resistance)
+
+### CLI Flags
+
+- `--no-session`: Don't restore previous session
+- `--no-save-session`: Don't save session on exit
+
+### Edge Cases
+
+| Scenario | Behavior |
+|----------|----------|
+| File deleted | Skipped, warning logged |
+| File moved | Skipped (path-based lookup) |
+| Corrupt session | Logged, start fresh |
+| Future version | Error with message |
+| Virtual buffers | Not persisted (file-backed only) |
+
+## File Open Dialog
+
+Fresh includes a built-in file browser for the Open File command (`Ctrl+O`). This works without plugins and provides a rich file browsing experience.
+
+### Features
+
+- **Column sorting**: Click headers to sort by name, size, modified date, or type
+- **Quick navigation**: Shortcuts for parent (`..`), root (`/`), and home (`~`)
+- **Fuzzy filtering**: Type to filter; non-matching entries shown grayed at bottom
+- **Metadata display**: File size (human-readable) and modification date
+- **Mouse support**: Click to select, double-click to open, drag scrollbar
+
+### Architecture
+
+**Key files:**
+- `src/app/file_open.rs` - `FileOpenState`, sorting, filtering logic
+- `src/view/ui/file_browser.rs` - `FileBrowserRenderer`
+
+**State management:**
+```rust
+pub struct FileOpenState {
+    pub current_dir: PathBuf,
+    pub entries: Vec<FileOpenEntry>,
+    pub sort_mode: SortMode,      // Name, Size, Modified, Type
+    pub sort_ascending: bool,
+    pub selected_index: usize,
+    pub filter: String,           // From prompt input
+}
+```
+
+**Rendering**: The file browser popup renders above the prompt when `PromptType::OpenFile` is active. Directories load asynchronously via `FsManager`.
+
+## Syntax Highlighting
+
+Fresh supports two syntax highlighting backends with automatic fallback:
+
+1. **Tree-sitter** (primary): Fast, accurate, incremental parsing. Used for built-in languages (Rust, JavaScript, TypeScript, Python, etc.)
+2. **TextMate grammars** (fallback): Uses `syntect` crate for broad language coverage. Supports VSCode-compatible grammars.
+
+### Highlighter Priority
+
+```
+1. Tree-sitter (if built-in support exists)
+2. User TextMate grammar (from ~/.config/fresh/grammars/)
+3. Built-in syntect grammars (100+ languages)
+4. No highlighting
+```
+
+### User Grammar Installation
+
+Add VSCode-compatible grammars to `~/.config/fresh/grammars/`:
+
+```
+~/.config/fresh/grammars/
+  my-language/
+    package.json           # VSCode extension manifest
+    syntaxes/
+      language.tmLanguage.json
+```
+
+### Implementation
+
+**Key files:**
+- `src/primitives/highlighter.rs` - Tree-sitter highlighter
+- `src/primitives/textmate_highlighter.rs` - TextMate grammar highlighter
+- `src/primitives/highlight_engine.rs` - Unified `HighlightEngine` abstraction
+- `src/primitives/grammar_registry.rs` - Grammar discovery and loading
+
+**Configuration** (in `config.json`):
+```json
+{
+  "languages": {
+    "haskell": {
+      "extensions": ["hs"],
+      "highlighter": "textmate"
+    }
+  }
+}
+```
+
+Options: `auto` (default), `tree-sitter`, `textmate`
+
+### Performance
+
+Both backends use viewport-only parsing:
+- Parse only visible lines + 1KB context
+- Cache parsed results (category-based for theme independence)
+- Invalidate cache on edits

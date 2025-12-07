@@ -6,11 +6,7 @@ Welcome to Fresh, a fast, extensible, and powerful terminal text editor. This gu
 
 ### Installation
 
-To get started with Fresh, you'll need to have the Rust toolchain installed on your system. You can then build the editor from source:
-
-```bash
-cargo build --release
-```
+See the [Installation section in the README](../README.md#installation) for all available installation methods, including Homebrew, AUR, .deb/.rpm packages, npm, crates.io, and building from source.
 
 ### Running Fresh
 
@@ -43,7 +39,7 @@ Fresh provides a powerful set of editing features to help you be more productive
 
 ### Navigation
 
-*   **Go to Definition:** Use `Ctrl+B` to jump to the definition of a symbol under the cursor (requires LSP).
+*   **Go to Definition:** Use the command palette (`Ctrl+P`) and search for "Go to Definition" to jump to the definition of a symbol under the cursor (requires LSP).
 *   **Position History:** Navigate back and forward through your edit locations using `Alt+Left` and `Alt+Right`.
 
 ### File Explorer
@@ -180,11 +176,11 @@ Fresh uses a visual regression testing system to ensure that UI changes are inte
 | Redo                   | `Ctrl+Y`              |
 | Select Next Occurrence | `Ctrl+D`              |
 | **Navigation**         |
-| Go to Definition       | `Ctrl+B`              |
+| Go to Definition       | Command Palette       |
 | Back                   | `Alt+Left`            |
 | Forward                | `Alt+Right`           |
 | **Layout**             |
 | Split Horizontal       | `Alt+H`               |
 | Split Vertical         | `Alt+V`               |
 | Next Split             | `Alt+O`               |
-| File Explorer          | `Ctrl+B`              |
+| File Explorer          | `Ctrl+E`              |

@@ -97,7 +97,7 @@
 [2m────────────────────────────────────────────────────────────[0m
   [33m•[0m [1mMulti-cursor:[0m [33mCtrl+D[0m adds cursor at next match
   [33m•[0m [1mSearch:[0m [33mCtrl+F[0m finds, [33mF3[0m/[33mShift+F3[0m navigates matches
-  [33m•[0m [1mFile Explorer:[0m [33mCtrl+B[0m toggles sidebar
+  [33m•[0m [1mFile Explorer:[0m [33mCtrl+E[0m toggles sidebar
   [33m•[0m [1mSplits:[0m Use View menu or command palette
 
 [1m[37m📚 Documentation[0m
