@@ -55,15 +55,23 @@ jobs:
         env:
           NPM_CONFIG_PROVENANCE: true
         run: |
+          echo "DEBUG: PLAN='$PLAN'"
+          echo "DEBUG: VERSION='$VERSION'"
+          echo "DEBUG: Contents of npm/:"
+          ls -la npm/ || echo "DEBUG: npm/ directory does not exist"
           if [ -n "$PLAN" ]; then
+            echo "DEBUG: Taking PLAN branch"
             # Called from release workflow - use plan to find packages
             for release in $(echo "$PLAN" | jq --compact-output '.releases[] | select([.artifacts[] | endswith("-npm-package.tar.gz")] | any)'); do
               pkg=$(echo "$release" | jq '.artifacts[] | select(endswith("-npm-package.tar.gz"))' --raw-output)
+              echo "DEBUG: Publishing ./npm/${pkg}"
               npm publish --access public --provenance "./npm/${pkg}"
             done
           else
+            echo "DEBUG: Taking else branch (manual trigger)"
             # Manual trigger - publish all npm packages found
-            for pkg in npm/*-npm-package.tar.gz; do
+            for pkg in ./npm/*-npm-package.tar.gz; do
+              echo "DEBUG: Publishing $pkg"
               npm publish --access public --provenance "$pkg"
             done
           fi
