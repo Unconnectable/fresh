@@ -13,7 +13,10 @@ on:
 
 jobs:
   build-flatpak:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/flathub-infra/flatpak-github-actions:freedesktop-24.08
+      options: --privileged
     steps:
       - uses: actions/checkout@v6
 
@@ -29,19 +32,6 @@ jobs:
           cd artifacts
           tar -xJf fresh-editor-x86_64-unknown-linux-gnu.tar.xz
           cp fresh-editor-x86_64-unknown-linux-gnu/fresh ../target/release/
-
-      - name: Install Flatpak and flatpak-builder
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y flatpak flatpak-builder appstream-compose libappstream-glib8
-
-      - name: Add Flathub repository
-        run: |
-          flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-
-      - name: Install runtime
-        run: |
-          flatpak install --user -y flathub org.freedesktop.Platform//24.08 org.freedesktop.Sdk//24.08
 
       - name: Update metainfo version
         run: |
