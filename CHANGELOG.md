@@ -1,5 +1,39 @@
 # Release Notes
 
+## 0.1.60
+
+### Features
+
+* **Shell Command Prompt**: Pipe buffer or selection through shell commands (Alt+|).
+
+* **On-Save Actions**: Run formatters/linters on save. Default formatters included for Rust (rustfmt), JavaScript/TypeScript (prettier), Python (ruff), C/C++ (clang-format), Go (gofmt).
+
+* **Stdin Input**: Pipe content via stdin with background streaming (`echo "hello" | fresh -`).
+
+* **Multi-File CLI**: Open multiple files from command line (#389).
+
+* **Tab Indent Selection**: Tab indents selected lines, Shift+Tab dedents (#353).
+
+* **Toggle Menu Bar**: Hide/show menu bar via command palette for extra screen space.
+
+* **Global File Positions**: Cursor/scroll positions stored globally per file, not per project (#423).
+
+### Bug Fixes
+
+* **On-Save Missing Tools**: Graceful handling when formatter/linter command not found.
+
+### Internal
+
+* Embedded plugins in binary as fallback for cargo-binstall (#416).
+
+* Removed duplicate theme JSON files (#438).
+
+* Extracted modules from mod.rs (file_operations, split_actions, clipboard, etc.).
+
+* Pinned Rust 1.92 via rust-toolchain.toml (#338).
+
+---
+
 ## 0.1.59
 
 ### Features
