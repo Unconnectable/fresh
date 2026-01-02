@@ -30,9 +30,9 @@
 
 * **Tab Size Zero Panic**: Fixed division by zero when tab_size is 0 (#580).
 
-* **Hidden Cursor Panic**: Fixed crash when rendering buffers with hidden cursors (#607).
+* **Hidden Cursor Panic**: Fixed crash when rendering buffers with hidden cursors (#607, yoooughtul).
 
-* **Settings Paste**: Fixed clipboard paste not working in Settings UI edit dialogs (#605).
+* **Settings Paste**: Fixed clipboard paste not working in Settings UI edit dialogs (#605, Tyooughtul).
 
 * **Show Hidden Truncation**: Fixed "Show Hidden" checkbox label truncated in file dialog (#558).
 
@@ -46,7 +46,7 @@
 
 * **Background Revert Jump**: Fixed viewport jumping when auto-reverting background files.
 
-* **Scrollbar Gaps**: Render scrollbars with background fills to avoid glyph gaps in some terminals.
+* **Scrollbar Gaps**: Render scrollbars with background fills to avoid glyph gaps in some terminals (Oleksii Smotrov).
 
 ### Performance
 
