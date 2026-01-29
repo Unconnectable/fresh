@@ -1,6 +1,3 @@
-# FreeBSD builds for fresh-editor
-# Uses a VM to build on actual FreeBSD environment
-
 name: FreeBSD Builds
 
 on:
@@ -11,37 +8,54 @@ jobs:
   build-freebsd:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
 
+      # Minimal Caching for Cargo
+      - name: Cache Cargo Registry
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+          key: freebsd-cargo-minimal-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            freebsd-cargo-minimal-
+
       - name: Build in FreeBSD
-        uses: vmactions/freebsd-builder@v1
+        id: build
+        uses: vmactions/freebsd-vm@v1
         with:
           usesh: true
+          # rsync is the default, ensuring target/ and archives come back to the host
+          sync: rsync
           prepare: |
             pkg install -y rust pkgconf
           run: |
-            cargo build --release
-            
-            # Create archive
-            VERSION=$(grep '^version' Cargo.toml | head -1 | sed 's/.*"\(.*\)".*/\1/')
+            # 1. Build project
+            cargo build --release --locked
+
+            # 2. Setup Variables
             TARGET="x86_64-unknown-freebsd"
             ARCHIVE_NAME="fresh-editor-${TARGET}"
             mkdir -p "${ARCHIVE_NAME}"
+
+            # 3. Package assets
             cp target/release/fresh "${ARCHIVE_NAME}/"
-            cp README.md LICENSE CHANGELOG.md "${ARCHIVE_NAME}/"
-            cp -r crates/fresh-editor/plugins "${ARCHIVE_NAME}/"
-            cp -r crates/fresh-editor/themes "${ARCHIVE_NAME}/"
-            
+            cp README.md LICENSE CHANGELOG.md "${ARCHIVE_NAME}/" || true
+            cp -r crates/fresh-editor/plugins "${ARCHIVE_NAME}/" || true
+            cp -r crates/fresh-editor/themes "${ARCHIVE_NAME}/" || true
+
+            # 4. Create Archive
             tar -cJvf "${ARCHIVE_NAME}.tar.xz" "${ARCHIVE_NAME}"
-            # Use sha256 -r to get the same format as sha256sum on Linux
-            sha256 -r "${ARCHIVE_NAME}.tar.xz" > "${ARCHIVE_NAME}.tar.xz.sha256"
+            sha256 -q "${ARCHIVE_NAME}.tar.xz" > "${ARCHIVE_NAME}.tar.xz.sha256"
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v4
         with:
-          name: artifacts-freebsd
+          name: fresh-editor-freebsd
           path: |
             fresh-editor-x86_64-unknown-freebsd.tar.xz
             fresh-editor-x86_64-unknown-freebsd.tar.xz.sha256
