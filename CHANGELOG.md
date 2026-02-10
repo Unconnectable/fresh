@@ -1,5 +1,25 @@
 # Release Notes
 
+## 0.2.2
+
+### Bug Fixes
+
+* **Regex Find-and-Replace**: Fixed regex mode not working. Added capture group support (`$1`, `$2`, `${name}`) and a toolbar hint when regex mode is active.
+
+* **Keybinding Editor**: Fixed actions with no default keybinding missing from the editor; all actions are now listed. Fixed inability to delete built-in keymap bindings. Fixed deleted bindings reappearing after save.
+
+* **LSP Completion Popup**: Fixed completion popup blocking typing when not working in non-English locales.
+
+* **Revised in-editor help**: Rewrote the in-memory help manual, should be a bit more useful.
+
+### Internal
+
+* Refactored keybinding editor into multi-file module.
+* Locked Cargo.toml dependency versions to minor; docs recommend `--locked`. Dependency updates.
+* ~53 documentation clarity fixes.
+
+---
+
 ## 0.2.0
 
 ### Features
